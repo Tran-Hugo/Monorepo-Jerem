@@ -1,0 +1,25 @@
+# config/api_resources/CartItem.yaml
+
+App\Entity\CartItem:
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+        - class: ApiPlatform\Metadata\Get
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Delete
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Post
+          name: 'add_cartitem'
+          uriTemplate: '/cart/add'
+          controller: App\Controller\Cart\AddToCartController
+        - class: ApiPlatform\Metadata\Patch
+          normalizationContext:
+            groups: ['cart:read']
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Get
+          name: 'get_cartitem_by_user'
+          uriTemplate: '/cart/'
+          controller: App\Controller\Cart\GetCartController
+        - class: ApiPlatform\Metadata\Get
+          name: 'get_cartitem_count'
+          uriTemplate: '/cart/count'
+          controller: App\Controller\Cart\GetTotalQuantityController

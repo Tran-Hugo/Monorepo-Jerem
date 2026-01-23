@@ -1,0 +1,19 @@
+App\Entity\Order:
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+          normalizationContext:
+                    groups: ['orders:read']
+          order: { createdAt: 'desc', id: 'asc' }
+        - class: ApiPlatform\Metadata\Get
+          normalizationContext:
+                  groups: ['order:read']
+
+        - class: ApiPlatform\Metadata\Post
+          name: 'ship_order'
+          uriTemplate: '/orders/{id}/ship'
+          controller: App\Controller\Order\ShipOrderController
+        
+        - class: ApiPlatform\Metadata\Post
+          name: 'cancel_order'
+          uriTemplate: '/orders/{id}/cancel'
+          controller: App\Controller\Order\CancelOrderController

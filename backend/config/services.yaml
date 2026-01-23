@@ -1,0 +1,85 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    stripe.secret_key: '%env(STRIPE_SECRET_KEY)%'
+    stripe.public_key: '%env(STRIPE_PUBLIC_KEY)%'
+    paypal.client_id: '%env(PAYPAL_CLIENT_ID)%'
+    paypal.client_secret: '%env(PAYPAL_CLIENT_SECRET)%'
+    paypal.webhook_id: '%env(PAYPAL_WEBHOOK_ID)%'
+    paypal.sandbox: '%env(bool:PAYPAL_SANDBOX)%'
+    mailer_from_email: '%env(MAILER_FROM_EMAIL)%'
+    mailer_from_name: '%env(MAILER_FROM_NAME)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Service\Payment\StripeStrategy:
+        tags: ['app.payment_strategy']
+        arguments:
+            $stripeSecretKey: '%stripe.secret_key%'
+    
+    App\Service\Payment\PaymentService:
+        arguments:
+            $strategies: !tagged_iterator app.payment_strategy
+
+    App\Service\Payment\PaypalStrategy:
+        tags: ['app.payment_strategy']
+        arguments:
+            $clientId: '%paypal.client_id%'
+            $clientSecret: '%paypal.client_secret%'
+            $webhookId: '%paypal.webhook_id%'
+            $sandbox: '%paypal.sandbox%'
+            
+    App\Service\EmailService:
+        arguments:
+            $fromEmail: '%mailer_from_email%'
+            $fromName: '%mailer_from_name%'
+
+    App\EventListener\ProductSlugListener:
+        tags:
+            - { name: doctrine.orm.entity_listener }
+
+    App\EventListener\CategorySlugListener:
+        tags:
+            - { name: doctrine.orm.entity_listener }
+
+    app.product_order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments:
+            - { id: ~, title: ~, price: ~ }   # colonnes que tu autorises au tri
+        tags:
+            - { name: 'api_platform.filter', id: 'product.order_filter' }
+        autowire: false
+        autoconfigure: false
+
+    app.product_deleted_filter:
+        parent: 'api_platform.doctrine.orm.boolean_filter'
+        arguments:
+            - { deleted: ~ }   # active le filtre sur la propriété "deleted"
+        tags:
+            - { name: 'api_platform.filter', id: 'product.deleted_filter' }
+        autowire: false
+        autoconfigure: false
+
+    app.address_user_filter:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            - { user: 'exact' }
+        tags:
+            - { name: 'api_platform.filter', id: 'address.user_filter' }
+        autowire: false
+        autoconfigure: false
+

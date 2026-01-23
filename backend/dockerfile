@@ -1,0 +1,55 @@
+FROM php:8.3-fpm
+
+# Installation des dépendances système et extensions PHP
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-install intl pdo pdo_mysql zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copier les fichiers de dépendances
+COPY composer.json symfony.lock* ./
+
+# Installer toutes les dépendances
+RUN composer install \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-scripts
+
+# Copier tout le code source
+COPY . .
+
+# Définir l'environnement de production
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+# Finaliser l'autoload
+RUN composer dump-autoload --optimize --classmap-authoritative
+
+# Créer les dossiers nécessaires
+RUN mkdir -p var/cache var/log public/uploads public/assets \
+    && chmod -R 777 var public
+
+# ⭐ Compiler les assets (SANS || echo pour voir les vraies erreurs)
+RUN php bin/console importmap:install --env=prod --no-interaction
+RUN php bin/console asset-map:compile --env=prod --no-interaction
+
+# Vérifier que les assets ont bien été créés
+RUN test -d public/assets/bundles/apiplatform && echo "✓ Assets compiled successfully" || (echo "✗ Assets not found" && exit 1)
+
+# Permissions finales
+RUN chown -R www-data:www-data var public
+
+# Basculer sur l'utilisateur www-data
+USER www-data
+
+EXPOSE 9000
+
+CMD ["php-fpm"]

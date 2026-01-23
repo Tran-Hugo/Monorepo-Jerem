@@ -1,0 +1,40 @@
+# config/api_resources/Product.yaml
+
+App\Entity\Product:
+      
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+          filters: ['product.order_filter', 'product.deleted_filter']
+          normalizationContext:
+                  groups: ['product:read']
+        - class: ApiPlatform\Metadata\Get
+          normalizationContext:
+                  groups: ['product:read']
+        - class: ApiPlatform\Metadata\Delete
+          security: "is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Post
+          name: 'create_product'
+          uriTemplate: '/products/create'
+          controller: App\Controller\Product\CreateProductController
+        - class: ApiPlatform\Metadata\Post
+          name: 'update_product'
+          uriTemplate: '/products/{id}/update'
+          controller: App\Controller\Product\UpdateProductController
+        - class: ApiPlatform\Metadata\Delete
+          name: 'delete_product'
+          uriTemplate: '/products/{id}/delete'
+          controller: App\Controller\Product\DeleteProductController
+        - class: ApiPlatform\Metadata\Get
+          name: 'product_by_slug'
+          uriTemplate: '/products/by-slug/{slug}'
+          provider: App\State\ProductBySlugProvider
+          uriVariables:
+              slug:
+                  fromClass: App\Entity\Product
+                  identifiers: ['slug']
+          requirements:
+              slug: '.+'
+          normalizationContext:
+              groups: ['product:read']
+
+

@@ -1,0 +1,12 @@
+App\Entity\Category:
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+        - class: ApiPlatform\Metadata\Get
+        - class: ApiPlatform\Metadata\Post
+          security: "is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Put
+          security: "is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Delete
+          security: "is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Patch
+          security: "is_granted('ROLE_ADMIN')"

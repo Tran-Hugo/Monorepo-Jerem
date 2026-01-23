@@ -1,0 +1,22 @@
+App\Entity\User:
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+          security: "is_granted('ROLE_ADMIN')"
+          normalizationContext:
+                  groups: ['user:read']
+        - class: ApiPlatform\Metadata\Get
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Delete
+          security: "is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Post
+          name: 'register_user'
+          uriTemplate: '/register_user'
+          controller: App\Controller\User\RegisterController
+        - class: ApiPlatform\Metadata\Get
+          name: 'me'
+          uriTemplate: '/me'
+          controller: App\Controller\User\MeController
+        - class: ApiPlatform\Metadata\Post
+          name: 'logout_user'
+          uriTemplate: '/logout'
+          controller: App\Controller\User\LogoutController

@@ -1,0 +1,19 @@
+App\Entity\Address:
+    operations:
+        - class: ApiPlatform\Metadata\GetCollection
+          filters: ['address.user_filter']
+          security: "is_granted('IS_AUTHENTICATED_FULLY')"
+        - class: ApiPlatform\Metadata\Get
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Post
+          security: "is_granted('IS_AUTHENTICATED_FULLY')"
+        - class: ApiPlatform\Metadata\Put
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Delete
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\Patch
+          security: "object.getUser() == user or is_granted('ROLE_ADMIN')"
+        - class: ApiPlatform\Metadata\GetCollection
+          name: 'my_addresses'
+          uriTemplate: '/address/me'
+          controller: App\Controller\Address\MyAddressesController
