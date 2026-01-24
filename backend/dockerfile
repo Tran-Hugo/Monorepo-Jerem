@@ -45,6 +45,7 @@ RUN php bin/console asset-map:compile --env=prod --no-interaction
 RUN test -d public/assets/bundles/apiplatform && echo "✓ Assets compiled successfully" || (echo "✗ Assets not found" && exit 1)
 
 # Permissions finales
+RUN chmod +x /var/www/html/entrypoint.sh
 RUN chown -R www-data:www-data var public
 
 # Basculer sur l'utilisateur www-data
@@ -52,4 +53,4 @@ USER www-data
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+ENTRYPOINT ["/var/www/html/entrypoint.sh"]

@@ -17,6 +17,6 @@ App\Entity\ShippingMethod:
           uriTemplate: '/shipping_methods/{id}/update'
           controller: App\Controller\ShippingMethod\UpdateShippingMethodController
         - class: ApiPlatform\Metadata\Delete
-          name: 'delete_product'
+          name: 'delete_shipping_method'
           uriTemplate: '/shipping_methods/{id}/delete'
           controller: App\Controller\ShippingMethod\SoftDeleteShippingMethodController
