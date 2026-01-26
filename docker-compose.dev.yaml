@@ -9,50 +9,9 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - app-network
-
-  # =========================
-  # Backend Symfony
-  # =========================
-  backend:
-    build:
-      context: ./backend
-      dockerfile: dockerfile.dev
-    volumes:
-      - ./backend:/var/www/html
-    env_file:
-      - backend/.env.dev
     ports:
-      - "8000:8000"
-    depends_on:
-      - mariadb
-    networks:
-      - app-network
-
-  # =========================
-  # Frontend Nuxt
-  # =========================
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: dockerfile.dev
-    volumes:
-      - ./frontend:/app:cached             # code source pour hot-reload
-      - frontend_node_modules:/app/node_modules
-    env_file:
-      - frontend/.env
-    ports:
-      - "3000:3000"                        # accès frontend dev
-    environment:
-      CHOKIDAR_USEPOLLING: "true"          # hot-reload fiable
-    networks:
-      - app-network
+      - "3306:3306"
 
 volumes:
   db_data:
-  frontend_node_modules:
 
-networks:
-  app-network:
-    driver: bridge
