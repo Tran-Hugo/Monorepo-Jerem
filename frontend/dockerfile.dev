@@ -1,8 +1,23 @@
-FROM node:20-alpine
+# Dockerfile.dev pour Nuxt avec Node 20 sur Debian
+FROM node:20-bullseye
 
 WORKDIR /app
-COPY package*.json ./
+
+# Copier package.json et package-lock.json pour profiter du cache Docker
+COPY package.json package-lock.json ./
+
+# Installer les dépendances
 RUN npm install
 
+# Copier tout le code source
 COPY . .
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# Exposer le port dev
+EXPOSE 3000
+
+# Variables pour hot-reload sur volumes Windows / WSL
+ENV CHOKIDAR_USEPOLLING=true
+ENV NODE_ENV=development
+
+# Lancer Nuxt en mode dev avec hot-reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--force"]

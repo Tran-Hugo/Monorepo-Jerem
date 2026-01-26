@@ -1,17 +1,25 @@
-FROM php:8.3-fpm
+FROM php:8.3-cli
 
+# Installer les extensions PHP nécessaires
 RUN apt-get update && apt-get install -y \
     git unzip libicu-dev libzip-dev \
-    && docker-php-ext-install intl pdo pdo_mysql zip
+    && docker-php-ext-install intl pdo_mysql zip \
+    && rm -rf /var/lib/apt/lists/*
 
+# Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# 🔥 CRUCIAL — créer les dossiers attendus par Symfony
-RUN mkdir -p var/cache var/log public/uploads/images public/assets \
-    && chmod -R 777 var public
+# Copier seulement les fichiers de dépendances pour le cache Docker
+COPY composer.json symfony.lock* ./
 
-RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf
+RUN composer install --no-scripts --no-interaction
 
-CMD ["php-fpm"]
+# Copier tout le code
+COPY . .
+
+EXPOSE 8000
+
+# Lancement du serveur PHP intégré pour dev
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

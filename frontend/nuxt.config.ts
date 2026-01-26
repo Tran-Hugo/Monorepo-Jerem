@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     },
   ],
   runtimeConfig: {
+    apiBase: process.env.API_BASE || 'http://backend:8000',
     public: {
       paypalClientId: process.env.NUXT_PUBLIC_PAYPAL_CLIENT_ID || '',
       NUXT_PUBLIC_API_BASE_URL: process.env.NUXT_PUBLIC_API_BASE_URL

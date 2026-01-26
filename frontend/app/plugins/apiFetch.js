@@ -1,7 +1,8 @@
 export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig()
   const baseURL = import.meta.server
-    ? 'http://nginx' // SSR → Docker internal
-    : useRuntimeConfig().public.NUXT_PUBLIC_API_BASE_URL;
+    ? config.apiBase   // SSR → API interne (backend ou Nginx selon env)
+    : config.public.NUXT_PUBLIC_API_BASE_URL // client → browser
   const cartStore = useCartStore()
   const ui = useUiStore()
   const auth = useAuthStore()
