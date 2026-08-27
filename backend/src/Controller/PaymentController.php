@@ -43,9 +43,35 @@ class PaymentController extends AbstractController
         }
     }
 
+    #[IsGranted('ROLE_USER')]
+    #[Route('/api/payment/paypal/capture', name: 'payment_paypal_capture', methods: ['POST'])]
+    public function capturePaypal(Request $request): JsonResponse
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true) ?: [];
+        $paypalOrderId = $data['paypalOrderId'] ?? null;
+        $orderId = $data['orderId'] ?? null;
+
+        if (!$paypalOrderId || !$orderId) {
+            return new JsonResponse(['error' => 'Missing paypalOrderId or orderId'], 400);
+        }
+
+        try {
+            return $this->paymentService->capturePaypalOrder($paypalOrderId, (int) $orderId, $user);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 400);
+        }
+    }
+
     #[Route('/api/payment/webhooks', name: 'payment_webhooks', methods: ['POST'])]
     public function handleWebhooks(Request $request): JsonResponse
     {
         return $this->paymentService->handleWebhookByRequest($request);
     }
 }
+
+
