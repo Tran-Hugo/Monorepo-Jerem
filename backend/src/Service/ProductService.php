@@ -29,6 +29,16 @@ class ProductService
         $product->setPrice($datas['price']);
         $product->setVisible($datas['visible']);
         $product->setStock($datas['stock']);
+        if (array_key_exists('mosaicPosition', $datas)) {
+            $mosaicPosition = ($datas['mosaicPosition'] !== '' && $datas['mosaicPosition'] !== null) ? (int) $datas['mosaicPosition'] : null;
+            if ($mosaicPosition !== null) {
+                $conflict = $this->productRepository->findOneBy(['mosaicPosition' => $mosaicPosition, 'deleted' => false]);
+                if ($conflict) {
+                    $conflict->setMosaicPosition(null);
+                }
+            }
+            $product->setMosaicPosition($mosaicPosition);
+        }
 
         // Gestion des catégories
         $categoriesIds = $datas['categoriesIds'] ?? "[]";
@@ -85,6 +95,16 @@ class ProductService
         $product->setPrice($datas['price']);
         $product->setVisible($datas['visible']);
         $product->setStock($datas['stock']);
+        if (array_key_exists('mosaicPosition', $datas)) {
+            $mosaicPosition = ($datas['mosaicPosition'] !== '' && $datas['mosaicPosition'] !== null) ? (int) $datas['mosaicPosition'] : null;
+            if ($mosaicPosition !== null) {
+                $conflict = $this->productRepository->findOneBy(['mosaicPosition' => $mosaicPosition, 'deleted' => false]);
+                if ($conflict && $conflict->getId() !== $product->getId()) {
+                    $conflict->setMosaicPosition(null);
+                }
+            }
+            $product->setMosaicPosition($mosaicPosition);
+        }
 
         // === Gestion des catégories ===
         $categoriesIds = $datas['categoriesIds'] ?? '[]';

@@ -90,6 +90,29 @@
       />
     </div>
 
+    <!-- Position dans la mosaïque -->
+    <div>
+      <label class="block text-gray-700 font-semibold mb-1">Position dans la mosaïque (Page d'accueil)</label>
+      <select
+        v-model="form.mosaicPosition"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+      >
+        <option :value="null">-- Non affiché dans la mosaïque --</option>
+        <option :value="1">1 - Grande tuile vedette (Haut-Gauche)</option>
+        <option :value="2">2 - Petite tuile (Haut-Centre)</option>
+        <option :value="3">3 - Petite tuile (Haut-Droite 1)</option>
+        <option :value="4">4 - Petite tuile (Haut-Droite 2)</option>
+        <option :value="5">5 - Petite tuile (Centre-Milieu)</option>
+        <option :value="6">6 - Petite tuile (Bas-Gauche 1)</option>
+        <option :value="7">7 - Petite tuile (Bas-Gauche 2)</option>
+        <option :value="8">8 - Petite tuile (Bas-Centre)</option>
+        <option :value="9">9 - Grande tuile maîtresse (Bas-Droite)</option>
+      </select>
+      <p class="text-xs text-gray-500 mt-1">
+        Les positions 1 et 9 correspondent aux deux grands emplacements 2x2 mis en valeur.
+      </p>
+    </div>
+
     <!-- Fichiers -->
     <div>
       <label class="block text-gray-700 font-semibold mb-1">Images</label>
@@ -186,7 +209,8 @@ const props = defineProps({
       files: [],
       images: [],
       categories: [],
-      mainImage: null
+      mainImage: null,
+      mosaicPosition: null
     })
   }
 })
@@ -200,6 +224,7 @@ const form = reactive({
   price: props.initialData.price,
   visible: props.initialData.visible,
   stock: props.initialData.stock,
+  mosaicPosition: props.initialData.mosaicPosition !== undefined ? props.initialData.mosaicPosition : null,
   files: [],
   categoryId: Array.isArray(props.initialData.categories) 
     ? props.initialData.categories.map(cat => cat.id) 
@@ -267,6 +292,11 @@ const onSubmit = () => {
   payload.append('stock', form.stock)
   payload.append('categoriesIds', JSON.stringify(form.categoryId))
   payload.append('mainImageId', mainImageId.value)
+  if (form.mosaicPosition !== null && form.mosaicPosition !== undefined && form.mosaicPosition !== '') {
+    payload.append('mosaicPosition', form.mosaicPosition)
+  } else {
+    payload.append('mosaicPosition', '')
+  }
 
   form.files.forEach(f => payload.append('files[]', f.file))
   payload.append('existingImages', JSON.stringify(existingImages.value))

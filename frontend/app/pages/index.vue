@@ -1,112 +1,37 @@
 <template>
   <div class="min-h-screen bg-neutral-50 text-neutral-900 selection:bg-neutral-900 selection:text-white">
+    
     <!-- ============================================ -->
-    <!-- 1. HERO SECTION                              -->
+    <!-- 1. HERO BANNER : MOSAÏQUE ARTISTIQUE         -->
     <!-- ============================================ -->
-    <section class="relative overflow-hidden bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-900 text-white py-20 lg:py-28">
-      <!-- Glows d'ambiance en arrière-plan -->
-      <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="absolute top-1/2 -right-40 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <section class="relative my-bg py-10 md:py-16 px-4 sm:px-6 lg:px-8 border-b border-neutral-200/80">
+      <div class="max-w-6xl mx-auto">
+        
+        <!-- Grille Mosaïque Artistique 5x3 (Dynamique) -->
+        <HomeMosaic :products="showcaseData?.mosaic" />
 
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <!-- Texte et CTAs -->
-          <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm text-xs sm:text-sm font-medium text-amber-300">
-              <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              Nouvelle collection disponible
-            </div>
-
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-              Des créations d'exception pour <span class="bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-300 bg-clip-text text-transparent">sublimer</span> votre quotidien
-            </h1>
-
-            <p class="text-lg sm:text-xl text-neutral-300 max-w-2xl mx-auto lg:mx-0 font-light leading-relaxed">
-              Explorez notre sélection raffinée d'œuvres d'art, tirages photographiques et pièces exclusives conçues par des créateurs passionnés.
-            </p>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <NuxtLink
-                to="/shop"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-amber-400 text-neutral-950 font-semibold text-base shadow-lg shadow-amber-400/20 hover:bg-amber-300 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-              >
-                <span>Découvrir la boutique</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </NuxtLink>
-
-              <a
-                href="#categories"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-base border border-white/15 backdrop-blur-sm transition-colors duration-200"
-              >
-                Explorer les catégories
-              </a>
-            </div>
-
-            <!-- Micro-stats de réassurance sous les CTA -->
-            <div class="pt-6 border-t border-white/10 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
-              <div>
-                <p class="text-2xl font-bold text-white">4.9/5</p>
-                <p class="text-xs text-neutral-400">Satisfaction clients</p>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-white">+500</p>
-                <p class="text-xs text-neutral-400">Pièces authentiques</p>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-white">24/48h</p>
-                <p class="text-xs text-neutral-400">Expédition suivie</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Visuel Hero (Carte produit vedette mise en scène) -->
-          <div class="lg:col-span-5 flex justify-center">
-            <div class="relative w-full max-w-md">
-              <div class="absolute inset-0 bg-gradient-to-tr from-amber-500 to-indigo-500 rounded-3xl transform rotate-3 scale-105 opacity-30 blur-lg"></div>
-              <div class="relative bg-neutral-900/90 border border-white/15 backdrop-blur-md rounded-3xl p-6 shadow-2xl space-y-4">
-                <div class="relative aspect-square w-full rounded-2xl overflow-hidden bg-neutral-800">
-                  <img
-                    v-if="featuredHeroProduct?.mainImage?.path"
-                    :src="baseUrl + '/' + featuredHeroProduct.mainImage.path"
-                    :alt="featuredHeroProduct.title || 'Produit vedette'"
-                    class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                  />
-                  <div v-else class="w-full h-full flex items-center justify-center text-neutral-500">
-                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span class="absolute top-3 right-3 px-3 py-1 bg-black/60 backdrop-blur-md text-amber-300 text-xs font-semibold rounded-full border border-white/10">
-                    Coup de cœur
-                  </span>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                  <div>
-                    <h3 class="text-lg font-semibold text-white">
-                      {{ featuredHeroProduct?.title || 'Création Exclusive' }}
-                    </h3>
-                    <p class="text-xs text-neutral-400">Édition limitée et signée</p>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-xl font-bold text-amber-400">
-                      {{ featuredHeroProduct?.price ? formatPrice(featuredHeroProduct.price) : 'Découvrir' }}
-                    </p>
-                  </div>
-                </div>
-
-                <NuxtLink
-                  :to="featuredHeroProduct?.slug ? `/product/${featuredHeroProduct.slug}` : '/shop'"
-                  class="block w-full py-3 text-center text-sm font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
-                >
-                  Voir les détails de l'œuvre
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
+        <!-- Boutons d'action sous la mosaïque -->
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+          <NuxtLink
+            to="/shop"
+            class="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+          >
+            <span>Explorer la boutique complète</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </NuxtLink>
+          <a
+            href="#selection"
+            class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/80 hover:bg-white text-neutral-800 font-medium text-sm border border-neutral-300 shadow-xs transition-colors"
+          >
+            <span>Voir nos coups de cœur</span>
+            <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </a>
         </div>
+
       </div>
     </section>
 
@@ -155,7 +80,7 @@
           <div class="flex items-center gap-4 p-4 rounded-xl hover:bg-neutral-50 transition-colors">
             <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
             <div>
@@ -168,7 +93,7 @@
     </section>
 
     <!-- ============================================ -->
-    <!-- 3. CATÉGORIES EN VEDETTE                     -->
+    <!-- 3. UNIVERS / CATÉGORIES                      -->
     <!-- ============================================ -->
     <section id="categories" class="py-16 lg:py-24">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -228,7 +153,7 @@
             </div>
           </NuxtLink>
 
-          <!-- Carte Catégorie 3: Nouveautés / Tout le magasin -->
+          <!-- Carte Catégorie 3: Nouveautés -->
           <NuxtLink
             to="/result?sort=desc"
             class="group relative h-80 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-end p-8 bg-neutral-900 text-white"
@@ -255,7 +180,7 @@
     <!-- ============================================ -->
     <!-- 4. VITRINE DE PRODUITS DYNAMIQUE             -->
     <!-- ============================================ -->
-    <section class="py-16 lg:py-24 bg-white border-y border-neutral-200">
+    <section id="selection" class="py-16 lg:py-24 bg-white border-y border-neutral-200">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Entête avec sélecteur d'onglets -->
         <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
@@ -299,7 +224,7 @@
                 loading="lazy"
               />
               <div v-else class="w-full h-full flex items-center justify-center text-neutral-400">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -515,6 +440,7 @@
         <p class="text-xs text-neutral-500">Pas de spam. Vous pourrez vous désinscrire à tout moment.</p>
       </div>
     </section>
+
   </div>
 </template>
 
@@ -526,14 +452,8 @@ import { formatPrice } from '@/utils/formatPrice.js'
 const config = useRuntimeConfig()
 const baseUrl = config.public.NUXT_PUBLIC_API_BASE_URL || 'https://api.ton-domaine.local'
 
-// Récupération des produits en vitrine
+// Récupération des produits en vitrine et de la mosaïque
 const { data: showcaseData } = await useShopShowcase()
-
-// Produit vedette du Hero
-const featuredHeroProduct = computed(() => {
-  const latest = showcaseData.value?.latest || []
-  return latest.length > 0 ? latest[0] : null
-})
 
 // Gestion des onglets de sélection
 const activeTab = ref('latest')
@@ -587,3 +507,11 @@ const handleNewsletter = () => {
   newsletterEmail.value = ''
 }
 </script>
+
+<style scoped>
+.my-bg {
+  background-image: url('/background.png');
+  background-repeat: repeat;
+  background-size: 800px;
+}
+</style>

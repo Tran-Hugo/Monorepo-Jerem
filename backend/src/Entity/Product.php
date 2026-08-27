@@ -64,6 +64,10 @@ class Product
     #[Groups(['product:read'])]
     private ?string $slug = null;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['product:read'])]
+    private ?int $mosaicPosition = null;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
@@ -220,6 +224,18 @@ class Product
     public function setSlug(string $slug): static
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    public function getMosaicPosition(): ?int
+    {
+        return $this->mosaicPosition;
+    }
+
+    public function setMosaicPosition(?int $mosaicPosition): static
+    {
+        $this->mosaicPosition = $mosaicPosition;
+
         return $this;
     }
 }
