@@ -3,6 +3,8 @@
 namespace App\Service\Payment;
 
 use App\Entity\Order;
+use App\Entity\User;
+use App\Service\OrderService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\Payment\PaymentStrategyInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,7 +15,8 @@ class PaymentService
      * @param iterable<PaymentStrategyInterface> $strategies
      */
     public function __construct(
-        private readonly iterable $strategies
+        private readonly iterable $strategies,
+        private readonly OrderService $orderService
     ) {}
 
     /**
@@ -58,17 +61,38 @@ class PaymentService
         return $strategy->handleWebhook($request);
     }
 
+    public function capturePaypalOrder(string $paypalOrderId, int $orderId, User $user): JsonResponse
+    {
+        $strategy = $this->getStrategyByName('paypal');
+        if (!$strategy instanceof PaypalStrategy) {
+            throw new \RuntimeException('PayPal strategy unavailable.');
+        }
+
+        $order = $this->orderService->getById($orderId);
+        if (!$order) {
+            throw new \RuntimeException('Order not found.');
+        }
+
+        if ($order->getUser()?->getId() !== $user->getId()) {
+            return new JsonResponse(['error' => 'Forbidden'], 403);
+        }
+
+        if ($order->getStatus() !== 'pending') {
+            return new JsonResponse(['error' => 'Only pending orders can be captured.'], 409);
+        }
+
+        return $strategy->capturePayment($paypalOrderId, $order);
+    }
+
     private function detectStrategyFromRequest(Request $request): ?PaymentStrategyInterface
     {
-        $type = $request->query->get('type');
-        
         // Stripe a ce header unique
         if ($request->headers->has('Stripe-Signature')) {
             return $this->getStrategyByName('stripe');
         }
 
         // PayPal utilise ces headers typiques
-        if ($request->headers->has('Paypal-Transmission-Id') || $type == "paypal") {
+        if ($request->headers->has('Paypal-Transmission-Id')) {
             return $this->getStrategyByName('paypal');
         }
 
