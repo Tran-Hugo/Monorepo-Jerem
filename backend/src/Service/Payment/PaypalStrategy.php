@@ -20,7 +20,7 @@ class PaypalStrategy implements PaymentStrategyInterface
         private readonly string $clientId,
         private readonly string $clientSecret,
         private readonly string $webhookId,
-        private readonly bool $sandbox = true,
+        private readonly bool $sandbox,
         private readonly OrderService $orderService,
         private readonly CacheInterface $cache
     ) {
@@ -141,10 +141,7 @@ class PaypalStrategy implements PaymentStrategyInterface
     public function handleWebhook(Request $request): JsonResponse
     {
         $payload = json_decode($request->getContent(), true);
-        $action = $request->query->get('action');
         $eventType = $payload['event_type'] ?? null;
-
-        if($action === "capture" && isset($payload["orderID"])) return $this->capturePayment($payload["orderID"]); 
 
         if ($eventType === 'PAYMENT.CAPTURE.COMPLETED') {
             if (!$this->verifyWebhook($request)) {
@@ -158,12 +155,12 @@ class PaypalStrategy implements PaymentStrategyInterface
         return new JsonResponse(['status' => 'PayPal webhook handled']);
     }
 
-    public function capturePayment(string $orderId)
+    public function capturePayment(string $paypalOrderId, Order $order): JsonResponse
     {
         try {
             $response = $this->httpClient->request(
                 'POST',
-                "https://api-m.sandbox.paypal.com/v2/checkout/orders/{$orderId}/capture",
+                "{$this->apiBase}/v2/checkout/orders/{$paypalOrderId}/capture",
                 [
                     'headers' => [
                         'Authorization' => 'Bearer '.$this->accessToken,
@@ -174,6 +171,26 @@ class PaypalStrategy implements PaymentStrategyInterface
             );
 
             $result = $response->toArray();
+
+            $capture = $result['purchase_units'][0]['payments']['captures'][0] ?? [];
+            $customId = $capture['custom_id'] ?? $result['purchase_units'][0]['custom_id'] ?? null;
+            $captureStatus = $capture['status'] ?? $result['status'] ?? null;
+            $capturedAmount = $capture['amount']['value'] ?? null;
+            $expectedAmount = number_format($order->getTotal() / 100, 2, '.', '');
+
+            if ((string) $customId !== (string) $order->getId()) {
+                return new JsonResponse(['error' => 'PayPal order does not match internal order.'], 422);
+            }
+
+            if ($captureStatus !== 'COMPLETED') {
+                return new JsonResponse(['error' => 'PayPal capture is not completed.'], 422);
+            }
+
+            if ($capturedAmount !== $expectedAmount) {
+                return new JsonResponse(['error' => 'Captured amount does not match order total.'], 422);
+            }
+
+            $this->orderService->handlePaymentSuccess($order);
 
             return new JsonResponse(['status' => 'Payment captured successfully']);
         } catch (\Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface $e) {

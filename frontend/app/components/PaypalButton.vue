@@ -75,9 +75,12 @@ onMounted(async () => {
 
     onApprove: async (data) => {
       try {
-        await $apiFetch('/api/payment/webhooks?type=paypal&action=capture', {
+        await $apiFetch('/api/payment/paypal/capture', {
           method: 'POST',
-          body: { orderID: data.orderID }
+          body: {
+            paypalOrderId: data.orderID,
+            orderId: actualOrderId.value
+          }
         })
         
         ui.showLoader()
