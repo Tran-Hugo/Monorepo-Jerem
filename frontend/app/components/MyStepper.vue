@@ -56,27 +56,35 @@ provide('stepper', {
   <div>
     <slot></slot>
 
-    <div class="mt-6 flex justify-between">
+    <div class="mt-8 pt-6 border-t border-neutral-200/80 flex items-center justify-between gap-4">
       <button
+        type="button"
         @click="prev"
         :disabled="currentStep === 0"
         :class="[
-          'rounded px-4 py-2 bg-gray-300 text-gray-700 disabled:opacity-50 cursor-pointer',
-          currentStep === 0 ? 'invisible' : ''
+          'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-300 text-neutral-700 font-medium text-sm hover:bg-neutral-50 hover:border-neutral-400 transition-all cursor-pointer shadow-2xs',
+          currentStep === 0 ? 'invisible pointer-events-none' : ''
         ]"
       >
-        {{ prevLabel }}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>{{ prevLabel }}</span>
       </button>
 
       <button
+        type="button"
         @click="next"
         :disabled="currentStep === steps.length - 1"
         :class="[
-          'rounded px-4 py-2 bg-blue-500 text-white disabled:opacity-50 cursor-pointer',
-          currentStep === steps.length - 1 ? 'invisible' : ''
+          'inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-sm transition-all cursor-pointer shadow-sm hover:shadow active:scale-[0.99]',
+          currentStep === steps.length - 1 ? 'invisible pointer-events-none' : ''
         ]"
       >
-        {{ nextLabel }}
+        <span>{{ currentStep === 0 ? 'Continuer vers la livraison' : currentStep === 1 ? 'Procéder au paiement' : nextLabel }}</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
     </div>
   </div>
