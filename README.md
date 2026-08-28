@@ -1,6 +1,6 @@
-# 🛍️ PayFusion — Monorepo E-Commerce & Multi-Gateway Payment System
+# 🛍️ Monorepo E-Commerce & Système de Paiement Modulaire
 
-Bienvenue sur le projet **PayFusion**, un proof of concept (POC) d'application e-commerce moderne architecturée en monorepo, intégrant un système de paiement multi-passerelles modulaire (**PayPal** & **Stripe**) basé sur le patron de conception **Strategy (Design Pattern)**.
+Bienvenue sur le projet d'application e-commerce moderne architecturée en monorepo, intégrant un système de paiement extensible basé sur le patron de conception **Strategy (Design Pattern)** avec **PayPal**.
 
 ---
 
@@ -12,7 +12,7 @@ Bienvenue sur le projet **PayFusion**, un proof of concept (POC) d'application e
   - [Pourquoi le Strategy Pattern ?](#pourquoi-le-strategy-pattern-)
   - [Modélisation & Diagramme de Classes](#modélisation--diagramme-de-classes)
   - [Flux d'Exécution & Diagramme de Séquence](#flux-dexécution--diagramme-de-séquence)
-  - [Implémentation des Stratégies (PayPal & Stripe)](#implémentation-des-stratégies-paypal--stripe)
+  - [Implémentation de la Stratégie PayPal](#implémentation-de-la-stratégie-paypal)
   - [Traitement Post-Paiement (OrderService)](#traitement-post-paiement-orderservice)
 - [4. Réseau, Proxy Nginx & Sécurité HTTPS](#4-réseau-proxy-nginx--sécurité-https)
 - [5. Guide d'Installation & Démarrage](#5-guide-dinstallation--démarrage)
@@ -48,9 +48,8 @@ graph TB
         end
     end
 
-    subgraph External[" Passerelles Externes "]
+    subgraph External[" Passerelle de Paiement "]
         PayPalAPI["PayPal REST API / SDK"]
-        StripeAPI["Stripe API / Checkout"]
     end
 
     Browser -->|HTTPS : ton-domaine.local| Nginx
@@ -62,7 +61,6 @@ graph TB
     Nuxt -->|SSR API Calls : http://nginx/api| Nginx
     Symfony -->|Doctrine DBAL/ORM| MariaDB
     Symfony -->|OAuth2 / REST API| PayPalAPI
-    Symfony -->|Stripe SDK| StripeAPI
 ```
 
 ---
@@ -111,17 +109,14 @@ Monorepo/
 
 ### Pourquoi le Strategy Pattern ?
 
-Le traitement des paiements implique différentes passerelles (**PayPal**, **Stripe**, et potentiellement de futures méthodes comme **Apple Pay**, **Klarna**, ou **Virement**) qui possèdent chacune :
-- Leurs propres mécanismes d'authentification (OAuth2 pour PayPal, API Key Bearer pour Stripe).
-- Leurs propres structures de charges utiles (*payloads*).
-- Leurs propres flux (SDK boutons interactifs avec capture côté serveur vs Redirection Checkout Session vs Webhooks asynchrones).
+Le traitement des paiements implique des logiques spécifiques pour chaque fournisseur (authentification, création de session, capture, webhooks). Le **Strategy Pattern** permet d'encapsuler la logique propre à chaque moyen de paiement dans une classe dédiée implémentant une interface unifiée (`PaymentStrategyInterface`).
 
-Le **Strategy Pattern** encapsule chaque algorithme de paiement dans une classe dédiée implémentant une interface commune (`PaymentStrategyInterface`).
+Bien que **PayPal** soit la passerelle active principale, cette architecture permet de brancher immédiatement n'importe quel autre fournisseur (ex: Apple Pay, Stripe, Klarna, virement bancaire) sans impacter la logique de commande ni les contrôleurs.
 
 #### Avantages majeurs :
-1. **Respect du principe Open/Closed (SOLID)** : L'ajout d'un nouveau fournisseur de paiement ne nécessite aucune modification du code existant de l'orchestrateur (`PaymentService`) ni du contrôleur (`PaymentController`).
-2. **Découplage & Testabilité** : Chaque passerelle peut être testée unitairement ou mockée indépendamment de la logique de commande.
-3. **Injection automatique via Symfony** : Les stratégies sont taguées et injectées dynamiquement via le mécanisme `!tagged_iterator` du conteneur de services Symfony.
+1. **Respect du principe Open/Closed (SOLID)** : L'ajout d'une nouvelle passerelle se fait par simple ajout d'une nouvelle classe implémentant `PaymentStrategyInterface`, sans modifier `PaymentService` ni `PaymentController`.
+2. **Découplage & Testabilité** : L'API PayPal est isolée dans sa propre stratégie (`PaypalStrategy`), facilitant les tests unitaires et le mocking.
+3. **Injection automatique via Symfony** : Les stratégies sont taguées (`app.payment_strategy`) et injectées dynamiquement via le mécanisme `!tagged_iterator` de Symfony.
 
 ---
 
@@ -131,14 +126,6 @@ Le **Strategy Pattern** encapsule chaque algorithme de paiement dans une classe 
 classDiagram
     class PaymentStrategyInterface {
         <<interface>>
-        +getName() string
-        +createCheckoutSession(Order orderData) array
-        +handleWebhook(Request request) JsonResponse
-    }
-
-    class StripeStrategy {
-        -StripeClient stripe
-        -string stripeSecretKey
         +getName() string
         +createCheckoutSession(Order orderData) array
         +handleWebhook(Request request) JsonResponse
@@ -180,7 +167,6 @@ classDiagram
         +handleWebhooks(Request request) JsonResponse
     }
 
-    PaymentStrategyInterface <|.. StripeStrategy : implements
     PaymentStrategyInterface <|.. PaypalStrategy : implements
     PaymentService o--> PaymentStrategyInterface : injects strategies
     PaymentController --> PaymentService : uses
@@ -190,15 +176,10 @@ classDiagram
 
 ### Configuration dans Symfony (`services.yaml`)
 
-Dans `backend/config/services.yaml`, les stratégies sont déclarées avec le tag `app.payment_strategy` et injectées automatiquement dans `PaymentService` :
+Dans `backend/config/services.yaml`, les stratégies sont enregistrées avec le tag `app.payment_strategy` et injectées automatiquement dans `PaymentService` :
 
 ```yaml
 services:
-    App\Service\Payment\StripeStrategy:
-        tags: ['app.payment_strategy']
-        arguments:
-            $stripeSecretKey: '%stripe.secret_key%'
-
     App\Service\Payment\PaypalStrategy:
         tags: ['app.payment_strategy']
         arguments:
@@ -269,8 +250,8 @@ sequenceDiagram
 
 ### Traitement Post-Paiement (`OrderService`)
 
-Lorsque la transaction est validée (soit par capture directe, soit par notification Webhook vérifiée avec signature cryptographique) :
-1. **Idempotence** : `OrderService::handlePaymentSuccess()` vérifie que la commande n'a pas déjà été marquée `paid` pour éviter les doubles traitements.
+Lorsque la transaction est validée (par capture immédiate ou notification Webhook signée) :
+1. **Idempotence** : `OrderService::handlePaymentSuccess()` s'assure qu'une commande déjà `paid` n'est pas retraitée.
 2. **Transaction de base de données** :
    - Mise à jour du statut de commande à `paid`.
    - Décrémentation automatique des stocks des articles achetés.
@@ -322,7 +303,7 @@ certutil -addstore -f Root "chemin\vers\Monorepo\ca\rootCA.pem"
 ### Étape 3 : Variables d'Environnement
 Vérifiez ou complétez les fichiers d'environnement :
 - `db/.env` (Identifiants MariaDB)
-- `backend/.env.prod` (Clés API Stripe, PayPal, JWT, SMTP)
+- `backend/.env.prod` (Identifiants PayPal, JWT, SMTP)
 - `frontend/.env.prod` (Client ID PayPal public, URL API)
 
 ### Étape 4 : Lancement des Conteneurs
@@ -368,7 +349,6 @@ docker compose exec backend php bin/console doctrine:schema:validate
 
 ---
 
-## 👨‍💻 Auteurs & Licence
+## 👨‍💻 Licence
 
-Projet développé dans le cadre du POC e-commerce PayFusion.
 Licence MIT.
