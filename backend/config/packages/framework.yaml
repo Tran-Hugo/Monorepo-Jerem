@@ -2,12 +2,15 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    trusted_proxies: '%env(default::TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
     # Note that the session will be started ONLY if you read or write from it.
     session:
         handler_id: null
         cookie_samesite: none
         cookie_secure: true
-        cookie_domain: .ton-domaine.local
+        cookie_domain: '%env(default::COOKIE_DOMAIN)%'
         cookie_httponly: true
         cookie_path: /
 

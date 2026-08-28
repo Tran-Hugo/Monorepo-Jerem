@@ -15,5 +15,6 @@ lexik_jwt_authentication:
             lifetime: null      # Laisse la durée du token
             samesite: none
             path: /
+            domain: '%env(default::COOKIE_DOMAIN)%'
             secure: true
             httpOnly: true
