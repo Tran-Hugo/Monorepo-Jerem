@@ -59,6 +59,19 @@ export const productsColumns = [
     minWidth: 200
   },
   { 
+    field: "mosaicPosition",
+    headerName: "Mosaïque",
+    flex: 1.5,
+    minWidth: 160,
+    cellRenderer: (params) => {
+      const pos = params.data.mosaicPosition;
+      if (!pos) return '<span class="text-gray-400 text-xs italic">-</span>';
+      if (pos === 1) return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">⭐ Slot 1 (Haut-G)</span>';
+      if (pos === 9) return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">⭐ Slot 9 (Bas-D)</span>';
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">Slot ${pos}</span>`;
+    }
+  },
+  { 
     field: "stock",
     flex: 1,
     minWidth: 100

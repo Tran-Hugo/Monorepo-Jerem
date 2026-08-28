@@ -110,4 +110,42 @@ class ProductRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @return Product[]
+     */
+    public function findMosaicProducts(): array
+    {
+        $positioned = $this->createQueryBuilder('p')
+            ->where('p.deleted = false')
+            ->andWhere('p.visible = true')
+            ->andWhere('p.mosaicPosition IS NOT NULL')
+            ->orderBy('p.mosaicPosition', 'ASC')
+            ->setMaxResults(9)
+            ->getQuery()
+            ->getResult();
+
+        if (count($positioned) >= 9) {
+            return $positioned;
+        }
+
+        $existingIds = array_map(fn(Product $p) => $p->getId(), $positioned);
+        $remainingLimit = 9 - count($positioned);
+
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.deleted = false')
+            ->andWhere('p.visible = true');
+
+        if (!empty($existingIds)) {
+            $qb->andWhere('p.id NOT IN (:existingIds)')
+               ->setParameter('existingIds', $existingIds);
+        }
+
+        $remaining = $qb->orderBy('p.id', 'DESC')
+            ->setMaxResults($remainingLimit)
+            ->getQuery()
+            ->getResult();
+
+        return array_merge($positioned, $remaining);
+    }
 }

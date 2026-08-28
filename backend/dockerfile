@@ -21,7 +21,8 @@ COPY composer.json symfony.lock* ./
 RUN composer install \
     --optimize-autoloader \
     --no-interaction \
-    --no-scripts
+    --no-scripts \
+    --no-security-blocking
 
 # Copier tout le code source
 COPY . .
