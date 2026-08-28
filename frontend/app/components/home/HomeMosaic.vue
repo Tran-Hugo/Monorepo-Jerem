@@ -7,7 +7,7 @@
       :to="`/product/${tile.slug}`"
       :class="[
         tile.gridClass,
-        'relative group overflow-hidden rounded-xl sm:rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 block'
+        'relative group overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 block'
       ]"
     >
       <img

@@ -369,77 +369,6 @@
       </div>
     </section>
 
-    <!-- ============================================ -->
-    <!-- 6. AVIS CLIENTS (SOCIAL PROOF)               -->
-    <!-- ============================================ -->
-    <section class="py-16 lg:py-24 bg-white">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Témoignages</span>
-          <h2 class="text-3xl sm:text-4xl font-bold text-neutral-900">Ce que disent nos clients</h2>
-          <p class="text-neutral-500 text-sm">Des retours authentiques de passionnés qui nous font confiance.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div
-            v-for="(review, index) in customerReviews"
-            :key="index"
-            class="p-6 rounded-2xl bg-neutral-50 border border-neutral-200/80 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow"
-          >
-            <!-- Étoiles -->
-            <div class="flex items-center gap-1 text-amber-400">
-              <svg v-for="star in 5" :key="star" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            </div>
-
-            <p class="text-sm text-neutral-700 leading-relaxed italic">
-              "{{ review.comment }}"
-            </p>
-
-            <div class="flex items-center gap-3 pt-2 border-t border-neutral-200">
-              <div class="w-9 h-9 rounded-full bg-neutral-200 text-neutral-700 font-bold flex items-center justify-center text-xs">
-                {{ review.initials }}
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-neutral-900">{{ review.name }}</p>
-                <p class="text-xs text-neutral-500">{{ review.city }} · Achat vérifié</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!-- 7. NEWSLETTER / CLUB                         -->
-    <!-- ============================================ -->
-    <section class="py-16 bg-neutral-900 text-white relative overflow-hidden">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-2xl relative z-10 space-y-6">
-        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Rejoignez le Club</span>
-        <h2 class="text-3xl sm:text-4xl font-bold">10% de réduction sur votre première commande</h2>
-        <p class="text-neutral-300 text-sm leading-relaxed">
-          Inscrivez-vous pour recevoir nos sorties en avant-première, des invitations privées et des inspirations décorations exclusives.
-        </p>
-
-        <form @submit.prevent="handleNewsletter" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2">
-          <input
-            v-model="newsletterEmail"
-            type="email"
-            placeholder="Entrez votre adresse email"
-            required
-            class="flex-1 px-4 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
-          />
-          <button
-            type="submit"
-            class="px-6 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-semibold text-sm transition-colors cursor-pointer"
-          >
-            S'inscrire
-          </button>
-        </form>
-        <p class="text-xs text-neutral-500">Pas de spam. Vous pourrez vous désinscrire à tout moment.</p>
-      </div>
-    </section>
 
   </div>
 </template>
@@ -471,41 +400,6 @@ const displayedProducts = computed(() => {
   return showcaseData.value.latest || []
 })
 
-// Témoignages clients
-const customerReviews = [
-  {
-    name: 'Sophie M.',
-    city: 'Paris',
-    initials: 'SM',
-    comment: 'Tirage absolument somptueux ! L’emballage était ultra renforcé, la qualité du papier et la profondeur des couleurs ont largement dépassé mes attentes.'
-  },
-  {
-    name: 'Alexandre D.',
-    city: 'Lyon',
-    initials: 'AD',
-    comment: 'Commande reçue en 48h chrono. L’illustration est encore plus belle en vrai, elle donne une vraie ambiance à mon salon. Je recommande les yeux fermés.'
-  },
-  {
-    name: 'Camille L.',
-    city: 'Bordeaux',
-    initials: 'CL',
-    comment: 'Un service client exemplaire et des pièces d’art véritablement originales. C’est déjà mon 3ème achat sur cette boutique, toujours parfait !'
-  }
-]
-
-// Newsletter
-const newsletterEmail = ref('')
-const toast = useToast()
-
-const handleNewsletter = () => {
-  if (!newsletterEmail.value) return
-  toast.add({
-    title: 'Bienvenue ! 🎉',
-    description: 'Merci pour votre inscription ! Votre code de bienvenue vous a été envoyé.',
-    color: 'success'
-  })
-  newsletterEmail.value = ''
-}
 </script>
 
 <style scoped>
